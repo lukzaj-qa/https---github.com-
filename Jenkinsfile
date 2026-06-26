@@ -51,7 +51,7 @@ pipeline {
         stage('Run API Tests') {
             steps {
                 echo '🧪 Wykonywanie testów API Bruno...'
-                bat 'call bru run --reporter-json results.json --reporter-junit results.xml --reporter-html results.html'
+                bat 'call bru run --env trello_v2 --reporter-json results.json --reporter-junit results.xml --reporter-html results.html'
             }
         }
         
