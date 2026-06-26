@@ -1,0 +1,8 @@
+name: trello_v2
+variables:
+  - name: trello_username
+    value: lukasz36773668
+  - name: api_key
+    value: 27b9115c8a8e426ec1cb1ba9ccf2f209
+  - name: api_token
+    value: ATTA5c88984b1a2fb58d0a171c99ebc7523eff94ca4beae604ffb697cd5003ffd5e001CCC07C

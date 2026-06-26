@@ -1,0 +1,31 @@
+info:
+  name: Get deleted board
+  type: http
+  seq: 5
+
+http:
+  method: GET
+  url: https://api.trello.com/1/boards/:id?key={{api_key}}&token={{api_token}}
+  params:
+    - name: key
+      value: "{{api_key}}"
+      type: query
+    - name: token
+      value: "{{api_token}}"
+      type: query
+    - name: id
+      value: "{{board_id}}"
+      type: path
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "404"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

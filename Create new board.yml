@@ -1,0 +1,45 @@
+info:
+  name: Create new board
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: https://api.trello.com/1/boards/?name=Bruno board&key={{api_key}}&token={{api_token}}&prefs_background=orange
+  params:
+    - name: name
+      value: Bruno board
+      type: query
+    - name: key
+      value: "{{api_key}}"
+      type: query
+    - name: token
+      value: "{{api_token}}"
+      type: query
+    - name: prefs_background
+      value: orange
+      type: query
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.body.name
+      operator: eq
+      value: Bruno board
+    - expression: res.body.closed
+      operator: isBoolean
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.id
+        method: jsonq
+      variable:
+        name: board_id
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

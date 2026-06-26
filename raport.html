@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Would use latest version, you'd better specify a version -->
+    <script src="https://unpkg.com/naive-ui"></script>
+
+    <title>Bruno</title>
+    <style>
+      .error > .status {
+        color: red;
+      }
+      .success > .status {
+        color: green;
+      }
+
+      .n-collapse-item.success > .n-collapse-item__header {
+        background-color: rgba(237, 247, 242, 1);
+      }
+      .n-collapse-item.error > .n-collapse-item__header {
+        background-color: rgba(251, 238, 241, 1);
+      }
+      .skipped > .status {
+        color: orange;
+      }
+
+      .min-width-150 {
+        min-width: 150px;
+      }
+
+      /* Metadata card styling - minimal custom styles */
+      .metadata-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .metadata-item {
+        text-align: center;
+        padding: 6px 8px;
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .metadata-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+
+      .metadata-value {
+        font-size: 0.8rem;
+        font-weight: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <n-config-provider :theme="theme">
+        <n-layout embedded position="absolute" content-style="padding: 24px;">
+          <n-card>
+            <n-flex>
+              <n-page-header title="Bruno run dashboard">
+                <template #avatar>
+                  <n-avatar size="large" style="background-color: transparent">
+                    <svg id="emoji" width="34" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+                      <g id="color">
+                        <path
+                          fill="#F4AA41"
+                          stroke="none"
+                          d="M23.5,14.5855l-4.5,1.75l-7.25,8.5l-4.5,10.75l2,5.25c1.2554,3.7911,3.5231,7.1832,7.25,10l2.5-3.3333 c0,0,3.8218,7.7098,10.7384,8.9598c0,0,10.2616,1.936,15.5949-0.8765c3.4203-1.8037,4.4167-4.4167,4.4167-4.4167l3.4167-3.4167 l1.5833,2.3333l2.0833-0.0833l5.4167-7.25L64,37.3355l-0.1667-4.5l-2.3333-5.5l-4.8333-7.4167c0,0-2.6667-4.9167-8.1667-3.9167 c0,0-6.5-4.8333-11.8333-4.0833S32.0833,10.6688,23.5,14.5855z"
+                        ></path>
+                        <polygon
+                          fill="#EA5A47"
+                          stroke="none"
+                          points="36,47.2521 32.9167,49.6688 30.4167,49.6688 30.3333,53.5021 31.0833,57.0021 32.1667,58.9188 35,60.4188 39.5833,59.8355 41.1667,58.0855 42.1667,53.8355 41.9167,49.8355 39.9167,50.0855"
+                        ></polygon>
+                        <polygon
+                          fill="#3F3F3F"
+                          stroke="none"
+                          points="32.5,36.9188 30.9167,40.6688 33.0833,41.9188 34.3333,42.4188 38.6667,42.5855 41.5833,40.3355 39.8333,37.0855"
+                        ></polygon>
+                      </g>
+                      <g id="hair"></g>
+                      <g id="skin"></g>
+                      <g id="skin-shadow"></g>
+                      <g id="line">
+                        <path
+                          fill="#000000"
+                          stroke="none"
+                          d="M29.5059,30.1088c0,0-1.8051,1.2424-2.7484,0.6679c-0.9434-0.5745-1.2424-1.8051-0.6679-2.7484 s1.805-1.2424,2.7484-0.6679S29.5059,30.1088,29.5059,30.1088z"
+                        ></path>
+                        <path
+                          fill="none"
+                          stroke="#000000"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-miterlimit="10"
+                          stroke-width="2"
+                          d="M33.1089,37.006h6.1457c0.4011,0,0.7634,0.2397,0.9203,0.6089l1.1579,2.7245l-2.1792,1.1456 c-0.6156,0.3236-1.3654-0.0645-1.4567-0.754"
+                        ></path>
+                        <path
+                          fill="none"
+                          stroke="#000000"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-miterlimit="10"
+                          stroke-width="2"
+                          d="M34.7606,40.763c-0.1132,0.6268-0.7757,0.9895-1.3647,0.7471l-2.3132-0.952l1.0899-2.9035 c0.1465-0.3901,0.5195-0.6486,0.9362-0.6486"
+                        ></path>
+                        <path
+                          fill="none"
+                          stroke="#000000"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-miterlimit="10"
+                          stroke-width="2"
+                          d="M30.4364,50.0268c0,0-0.7187,8.7934,3.0072,9.9375c2.6459,0.8125,5.1497,0.5324,6.0625-0.25 c0.875-0.75,2.6323-4.4741,1.8267-9.6875"
+                        ></path>
+                        <path
+                          fill="#000000"
+                          stroke="none"
+                          d="M44.2636,30.1088c0,0,1.805,1.2424,2.7484,0.6679c0.9434-0.5745,1.2424-1.8051,0.6679-2.7484 c-0.5745-0.9434-1.805-1.2424-2.7484-0.6679C43.9881,27.9349,44.2636,30.1088,44.2636,30.1088z"
+                        ></path>
+                        <path
+                          fill="none"
+                          stroke="#000000"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-miterlimit="10"
+                          stroke-width="2"
+                          d="M25.6245,42.8393c-0.475,3.6024,2.2343,5.7505,4.2847,6.8414c1.1968,0.6367,2.6508,0.5182,3.7176-0.3181l2.581-2.0233l2.581,2.0233 c1.0669,0.8363,2.5209,0.9548,3.7176,0.3181c2.0504-1.0909,4.7597-3.239,4.2847-6.8414"
+                        ></path>
+                        <path
+                          fill="none"
+                          stroke="#000000"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-miterlimit="10"
+                          stroke-width="2"
+                          d="M19.9509,28.3572c-2.3166,5.1597-0.5084,13.0249,0.119,15.3759c0.122,0.4571,0.0755,0.9355-0.1271,1.3631l-1.9874,4.1937 c-0.623,1.3146-2.3934,1.5533-3.331,0.4409c-3.1921-3.7871-8.5584-11.3899-6.5486-16.686 c7.0625-18.6104,15.8677-18.1429,15.8677-18.1429c2.8453-1.9336,13.1042-6.9375,24.8125,0.875c0,0,8.6323-1.7175,14.9375,16.9375 c1.8036,5.3362-3.4297,12.8668-6.5506,16.6442c-0.9312,1.127-2.7162,0.8939-3.3423-0.4272l-1.9741-4.1656 c-0.2026-0.4275-0.2491-0.906-0.1271-1.3631c0.6275-2.3509,2.4356-10.2161,0.119-15.3759"
+                        ></path>
+                        <path
+                          fill="none"
+                          stroke="#000000"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-miterlimit="10"
+                          stroke-width="2"
+                          d="M52.6309,46.4628c0,0-3.0781,6.7216-7.8049,8.2712"
+                        ></path>
+                        <path
+                          fill="none"
+                          stroke="#000000"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-miterlimit="10"
+                          stroke-width="2"
+                          d="M19.437,46.969c0,0,3.0781,6.0823,7.8049,7.632"
+                        ></path>
+                        <line
+                          x1="36.2078"
+                          x2="36.2078"
+                          y1="47.3393"
+                          y2="44.3093"
+                          fill="none"
+                          stroke="#000000"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-miterlimit="10"
+                          stroke-width="2"
+                        ></line>
+                      </g>
+                    </svg>
+                  </n-avatar>
+                </template>
+                <template #extra>
+                  <n-flex justify="end">
+                    <n-switch v-model:value="darkMode" :rail-style="darkModeRailStyle">
+                      <template #checked> Dark </template>
+                      <template #unchecked> Light </template>
+                    </n-switch>
+                  </n-flex>
+                </template>
+              </n-page-header>
+              <n-tabs type="segment" animated v-model:value="currentTab">
+                <n-tab-pane name="summary" tab="Summary">
+                  <n-flex justify="center" vertical>
+                    <!-- Run Information Card using Naive UI components -->
+                    <n-card title="Run Information" size="small">
+                      <div class="metadata-grid">
+                        <n-card class="metadata-item" size="small">
+                          <div class="metadata-label">Date & Time</div>
+                          <div class="metadata-value">{{ runCompletionTime }}</div>
+                        </n-card>
+                        <n-card class="metadata-item" size="small">
+                          <div class="metadata-label">Version</div>
+                          <div class="metadata-value">{{ brunoVersion }}</div>
+                        </n-card>
+                        <n-card class="metadata-item" size="small">
+                          <div class="metadata-label">Environment</div>
+                          <div class="metadata-value">{{ environment }}</div>
+                        </n-card>
+                        <n-card class="metadata-item" size="small">
+                          <div class="metadata-label">Total run duration</div>
+                          <div class="metadata-value">{{ totalDuration }}</div>
+                        </n-card>
+                        <n-card class="metadata-item" size="small">
+                          <div class="metadata-label">Total data received</div>
+                          <div class="metadata-value">{{ totalDataReceived }}</div>
+                        </n-card>
+                        <n-card class="metadata-item" size="small">
+                          <div class="metadata-label">Average response time</div>
+                          <div class="metadata-value">{{ averageResponseTime }}</div>
+                        </n-card>
+                      </div>
+                    </n-card>
+                    <x-summary v-for="(result, index) in res" :res="result" :key="index"></x-summary>
+                  </n-flex>
+                </n-tab-pane>
+                <n-tab-pane name="requests" tab="Requests">
+                  <n-flex justify="center" vertical>
+                    <x-requests v-for="(result, index) in res" :res="result" :key="index"></x-requests>
+                  </n-flex>
+                </n-tab-pane>
+              </n-tabs>
+            </n-flex>
+          </n-card>
+        </n-layout>
+      </n-config-provider>
+    </div>
+    <script type="text/x-template" id="summary-component">
+      <n-flex vertical style="margin-bottom: 50px;">
+        <n-card>
+          <template #header>
+            <span style="font-size: 24px;">{{ iterationTitle }}</span>
+          </template>
+          <n-flex justify="center">
+            <n-flex justify="center">
+              <n-alert type="success">
+                <n-statistic
+                  label="Total requests"
+                  :value="summaryTotalRequests"
+                >
+                </n-statistic>
+              </n-alert>
+              <n-alert :type="summaryErrors ? 'error' : 'success'">
+                <n-statistic label="Total errors" :value="summaryErrors">
+                </n-statistic>
+              </n-alert>
+              <n-alert type="success">
+                <n-statistic
+                  label="Total Controls"
+                  :value="summaryTotalControls"
+                >
+                </n-statistic>
+              </n-alert>
+              <n-alert :type="summaryFailedControls ? 'error' : 'success'">
+                <n-statistic
+                  label="Total Failed Controls"
+                  :value="summaryFailedControls"
+                >
+                </n-statistic>
+              </n-alert>
+              <n-alert type="warning" v-if="summarySkippedRequests">
+                <n-statistic label="Skipped requests" :value="summarySkippedRequests">
+                </n-statistic>
+              </n-alert>
+            </n-flex>
+          </n-flex>
+        </n-card>
+        <n-data-table :columns="summaryColumns" :data="summaryData" />
+      </n-flex>
+    </script>
+    <script type="text/x-template" id="requests-component">
+      <n-card>
+        <template #header>
+          <span style="font-size: 24px;">{{ iterationTitle }}</span>
+        </template>
+        <n-flex vertical style="margin-bottom: 50px">
+          <n-switch
+            v-model:value="onlyFailed"
+            :rail-style="railStyle"
+          >
+            <template #checked> Only Failed </template>
+            <template #unchecked> Show All </template>
+          </n-switch>
+
+          <n-collapse>
+            <x-result v-for="result in results" :result="result.value" :index="result.index" :key="result.index"></x-result>
+          </n-collapse>
+        </n-flex>
+      </n-card>
+    </script>
+    <script type="text/x-template" id="result-component">
+      <n-collapse-item
+        :name="resultTitle"
+        arrow-placement="right"
+      >
+        <template #header>
+          <n-alert
+            :type="getAlertType"
+            :bordered="false"
+          >
+            <template #header>
+              {{result.path}} - {{result.response.status === 'skipped' ? 'Request Skipped' : (totalPassed + '/' + total + ' Passed')}} {{hasError && result.response.status !== 'skipped' ? " - (request failed)" : "" }}
+            </template>
+          </n-alert>
+        </template>
+        <n-flex vertical>
+          <n-grid x-gap="12" :cols="2">
+            <n-gi>
+              <n-card title="REQUEST INFORMATION">
+                <n-list>
+                  <n-list-item>
+                    <n-thing
+                      title="File"
+                      :description="result.path"
+                    />
+                  </n-list-item>
+                  <n-list-item>
+                    <n-thing
+                      title="Request Method"
+                      :description="result.request.method"
+                    />
+                  </n-list-item>
+                  <n-list-item>
+                    <n-thing
+                      title="Request URL"
+                      :description="result.request.url"
+                    />
+                  </n-list-item>
+                </n-list>
+              </n-card>
+            </n-gi>
+            <n-gi>
+              <n-card title="RESPONSE INFORMATION">
+                <n-list>
+                  <n-list-item>
+                    <n-thing
+                      title="Response Code"
+                      :description="'' + result.response.status"
+                    />
+                  </n-list-item>
+                  <n-list-item>
+                    <n-thing
+                      title="Response time"
+                      :description="result.response.responseTime + ' ms'"
+                    />
+                  </n-list-item>
+                  <n-list-item>
+                    <n-thing
+                      title="Test duration"
+                      :description="testDuration"
+                    />
+                  </n-list-item>
+                </n-list>
+              </n-card>
+            </n-gi>
+          </n-grid>
+          <n-alert v-if="hasError || (result.response.status === 'skipped' && result.error)" title="Error" type="error">
+            {{result.error}}
+          </n-alert>
+          <n-card title="REQUEST HEADERS">
+            <n-data-table
+              :columns="headerColumns"
+              :data="headerDataRequest"
+            />
+          </n-card>
+          <n-card
+            v-if="result.request.data"
+            title="REQUEST BODY"
+          >
+          <iframe
+            v-if="result.request.isHtml"
+            :srcdoc="result.request.data"
+            style="width: 100%; height: 400px; border: none;"
+          ></iframe>
+
+          <pre v-else>{{ result.request.data }}</pre>
+          </n-card>
+          <n-card title="RESPONSE HEADERS">
+            <n-data-table
+              :columns="headerColumns"
+              :data="headerDataResponse"
+            />
+          </n-card>
+          <n-card
+            v-if="result.response.data"
+            title="RESPONSE BODY"
+          >
+          <iframe
+            v-if="result.response.isHtml"
+            :srcdoc="result.response.data"
+            style="width: 100%; height: 400px; border: none;"
+          ></iframe>
+
+          <pre v-else>{{ result.response.data }}</pre>          </n-card>
+          <n-card title="ASSERTIONS INFORMATION">
+            <n-data-table
+              :columns="assertionsColumns"
+              :data="result.assertionResults"
+              :row-class-name="assertionsRowClassName"
+            />
+          </n-card>
+          <n-card title="TESTS INFORMATION">
+            <n-data-table
+              :columns="testsColumns"
+              :data="result.testResults"
+              :row-class-name="testsRowClassName"
+            />
+          </n-card>
+        </n-flex>
+      </n-collapse-item>
+    </script>
+    <script>
+      const { createApp, ref, computed, onMounted } = Vue;
+
+      const getFilteredRequestResults = (e=[],n=!1)=>{const t=(Array.isArray(e)?e:[]).map(((e,n)=>({value:e,index:n})));return n?t.filter((({value:e})=>{var n,t;return"error"===(null==e?void 0:e.status)||!!(null===(n=null==e?void 0:e.testResults)||void 0===n?void 0:n.find((e=>"pass"!==e.status)))||!!(null===(t=null==e?void 0:e.assertionResults)||void 0===t?void 0:t.find((e=>"pass"!==e.status)))})):t};
+
+      function mergeTests(runnerResults) {
+        if (!Array.isArray(runnerResults)) return runnerResults; 
+
+        runnerResults.forEach(iteration => {
+          const { totalTests, passedTests, failedTests, totalPreRequestTests, passedPreRequestTests, failedPreRequestTests, totalPostResponseTests, passedPostResponseTests, failedPostResponseTests } = iteration.summary;
+          
+          // Merge summary test counts
+          iteration.summary.totalTests = totalTests + totalPreRequestTests + totalPostResponseTests;
+          iteration.summary.passedTests = passedTests + passedPreRequestTests + passedPostResponseTests;
+          iteration.summary.failedTests = failedTests + failedPreRequestTests + failedPostResponseTests;
+          
+          // Merge individual result test arrays
+          iteration.results.forEach(result => {
+            result.testResults = [
+              ...(result.preRequestTestResults || []),
+              ...(result.postResponseTestResults || []),
+              ...(result.testResults || [])
+            ];
+          }); 
+        });
+        
+        return runnerResults;
+      }
+
+      const App = {
+        setup() {
+          function decodeBase64(base64) {
+            const binary = atob(base64);
+            const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+            return new TextDecoder().decode(bytes);
+          }
+          const rawResults = JSON.parse(decodeBase64('eyJyZXN1bHRzIjpbeyJpdGVyYXRpb25JbmRleCI6MCwicmVzdWx0cyI6W3sidGVzdCI6eyJmaWxlbmFtZSI6ImdldCBteSBtZW1iZXIueW1sIn0sInJlcXVlc3QiOnsibWV0aG9kIjoiR0VUIiwidXJsIjoiaHR0cHM6Ly9hcGkudHJlbGxvLmNvbS8xL21lbWJlcnMvbHVrYXN6MzY3NzM2NjgiLCJoZWFkZXJzIjp7ImNvbnRlbnQtdHlwZSI6bnVsbH0sImlzSHRtbCI6ZmFsc2V9LCJyZXNwb25zZSI6eyJzdGF0dXMiOjIwMCwic3RhdHVzVGV4dCI6Ik9LIiwiaGVhZGVycyI6eyJjb250ZW50LXR5cGUiOiJhcHBsaWNhdGlvbi9qc29uOyBjaGFyc2V0PXV0Zi04IiwiY29udGVudC1sZW5ndGgiOiIxMTk0IiwiY29ubmVjdGlvbiI6ImNsb3NlIiwiZGF0ZSI6IkZyaSwgMjYgSnVuIDIwMjYgMTE6NTg6MTcgR01UIiwicmVmZXJyZXItcG9saWN5Ijoic3RyaWN0LW9yaWdpbi13aGVuLWNyb3NzLW9yaWdpbiIsIngtZG5zLXByZWZldGNoLWNvbnRyb2wiOiJvZmYiLCJ4LWRvd25sb2FkLW9wdGlvbnMiOiJub29wZW4iLCJ4LWZyYW1lLW9wdGlvbnMiOiJERU5ZIiwieC1wZXJtaXR0ZWQtY3Jvc3MtZG9tYWluLXBvbGljaWVzIjoibm9uZSIsInN1cnJvZ2F0ZS1jb250cm9sIjoibm8tc3RvcmUiLCJjYWNoZS1jb250cm9sIjoibWF4LWFnZT0wLCBtdXN0LXJldmFsaWRhdGUsIG5vLWNhY2hlLCBuby1zdG9yZSIsImV4cGlyZXMiOiJUaHUsIDAxIEphbiAxOTcwIDAwOjAwOjAwIiwieC10cmVsbG8tdmVyc2lvbiI6IjEuNDY5ODA3LjAiLCJ4LXRyZWxsby1lbnZpcm9ubWVudCI6IlByb2R1Y3Rpb24iLCJzZXQtY29va2llIjpbImRzYz01NWViNzBmYjI0YTNkN2UwMmQ0Yjk2ZTliODJhZGU4NTQyNjQzNWRhOGUxMjE3YjJhMWZkNGEwYTIzOTkzNTViOyBQYXRoPS87IEV4cGlyZXM9U3VuLCAyNiBKdWwgMjAyNiAxMTo1ODoxNyBHTVQ7IFNlY3VyZTsgU2FtZVNpdGU9Tm9uZSJdLCJhY2Nlc3MtY29udHJvbC1hbGxvdy1vcmlnaW4iOiIqIiwiYWNjZXNzLWNvbnRyb2wtYWxsb3ctbWV0aG9kcyI6IkdFVCwgUFVULCBQT1NULCBERUxFVEUiLCJhY2Nlc3MtY29udHJvbC1hbGxvdy1oZWFkZXJzIjoiQXV0aG9yaXphdGlvbiwgQWNjZXB0LCBDb250ZW50LVR5cGUiLCJhY2Nlc3MtY29udHJvbC1leHBvc2UtaGVhZGVycyI6IngtcmF0ZS1saW1pdC1hcGkta2V5LWludGVydmFsLW1zLCB4LXJhdGUtbGltaXQtYXBpLWtleS1tYXgsIHgtcmF0ZS1saW1pdC1hcGkta2V5LXJlbWFpbmluZywgeC1yYXRlLWxpbWl0LWFwaS10b2tlbi1pbnRlcnZhbC1tcywgeC1yYXRlLWxpbWl0LWFwaS10b2tlbi1tYXgsIHgtcmF0ZS1saW1pdC1hcGktdG9rZW4tcmVtYWluaW5nLCByZXRyeS1hZnRlciIsIngtcmF0ZS1saW1pdC1hc2FwLWludGVydmFsLW1zIjoiMTAwMDAiLCJ4LXJhdGUtbGltaXQtYXNhcC1tYXgiOiIxMDAwMDAwIiwieC1yYXRlLWxpbWl0LWFzYXAtcmVtYWluaW5nIjoiOTkzNDg0IiwieC1zZXJ2ZXItdGltZSI6IjE3ODI0NzUwOTc1NTIiLCJzZXJ2ZXIiOiJBdGxhc3NpYW5FZGdlIiwieC1jb250ZW50LXR5cGUtb3B0aW9ucyI6Im5vc25pZmYiLCJ4LXhzcy1wcm90ZWN0aW9uIjoiMTsgbW9kZT1ibG9jayIsImF0bC10cmFjZWlkIjoiNDczOTQ4ZDUzMWU1NDhjMzgzZTJlZjc2MTM5YzA5NWYiLCJhdGwtcmVxdWVzdC1pZCI6IjQ3Mzk0OGQ1LTMxZTUtNDhjMy04M2UyLWVmNzYxMzljMDk1ZiIsInN0cmljdC10cmFuc3BvcnQtc2VjdXJpdHkiOiJtYXgtYWdlPTYzMDcyMDAwOyBwcmVsb2FkIiwicmVwb3J0LXRvIjoie1wiZW5kcG9pbnRzXCI6IFt7XCJ1cmxcIjogXCJodHRwczovL2R6OGFvcGVua3Z2NnMuY2xvdWRmcm9udC5uZXRcIn1dLCBcImdyb3VwXCI6IFwiZW5kcG9pbnQtMVwiLCBcImluY2x1ZGVfc3ViZG9tYWluc1wiOiB0cnVlLCBcIm1heF9hZ2VcIjogNjAwfSIsIm5lbCI6IntcImZhaWx1cmVfZnJhY3Rpb25cIjogMC4wMSwgXCJpbmNsdWRlX3N1YmRvbWFpbnNcIjogdHJ1ZSwgXCJtYXhfYWdlXCI6IDYwMCwgXCJyZXBvcnRfdG9cIjogXCJlbmRwb2ludC0xXCJ9IiwieC1jYWNoZSI6Ik1pc3MgZnJvbSBjbG91ZGZyb250IiwidmlhIjoiMS4xIDQ0NGM4Njc4MGNlOTlkMmZjNzI5MjA4YTI1Y2I2YWEyLmNsb3VkZnJvbnQubmV0IChDbG91ZEZyb250KSIsIngtYW16LWNmLXBvcCI6IldBVzUxLVAyIiwiYWx0LXN2YyI6ImgzPVwiOjQ0M1wiOyBtYT04NjQwMCIsIngtYW16LWNmLWlkIjoiYXNjZmZJNUNxdTNacGxzQnZHa0xiQjBSUkxVa1VwQTY5bmZhczlLODVCRjlUbXRzNTZUdHhBPT0iLCJzZXJ2ZXItdGltaW5nIjoiY2RuLXVwc3RyZWFtLWxheWVyO2Rlc2M9XCJFREdFXCIsY2RuLXVwc3RyZWFtLWRucztkdXI9MCxjZG4tdXBzdHJlYW0tY29ubmVjdDtkdXI9MCxjZG4tdXBzdHJlYW0tZmJsO2R1cj0xNzUsYXRsLWVkZ2U7ZHVyPTE1NSxhdGwtZWRnZS1pbnRlcm5hbDtkdXI9NixhdGwtZWRnZS11cHN0cmVhbTtkdXI9MTQ5LGF0bC1lZGdlLXBvcDtkZXNjPVwiYXdzLWV1LWNlbnRyYWwtMVwiLGNkbi1jYWNoZS1taXNzLGNkbi1wb3A7ZGVzYz1cIldBVzUxLVAyXCIsY2RuLXJpZDtkZXNjPVwiYXNjZmZJNUNxdTNacGxzQnZHa0xiQjBSUkxVa1VwQTY5bmZhczlLODVCRjlUbXRzNTZUdHhBPT1cIixjZG4tZG93bnN0cmVhbS1mYmw7ZHVyPTE3OSJ9LCJkYXRhIjp7ImlkIjoiNjNkY2E3N2NiODUyYWM1YTA3YjI0NzIxIiwiYWFJZCI6IjYzYThiZDk4NzQxMjQ4NzQ2YmY2MDQ0MCIsImFjdGl2aXR5QmxvY2tlZCI6ZmFsc2UsImF2YXRhckhhc2giOiI0MGJhYzNlMzNkMmU3ZGI1YmEwNzQ3MWQxNDU0ZmY1YSIsImF2YXRhclVybCI6Imh0dHBzOi8vdHJlbGxvLW1lbWJlcnMuczMuYW1hem9uYXdzLmNvbS82M2RjYTc3Y2I4NTJhYzVhMDdiMjQ3MjEvNDBiYWMzZTMzZDJlN2RiNWJhMDc0NzFkMTQ1NGZmNWEiLCJiaW8iOiIiLCJiaW9EYXRhIjpudWxsLCJjb25maXJtZWQiOnRydWUsImZ1bGxOYW1lIjoiTHVrYXN6IiwiaWRFbnRlcnByaXNlIjpudWxsLCJpZEVudGVycHJpc2VzRGVhY3RpdmF0ZWQiOm51bGwsImlkTWVtYmVyUmVmZXJyZXIiOm51bGwsImlkUHJlbU9yZ3NBZG1pbiI6bnVsbCwiaW5pdGlhbHMiOiJMIiwibWVtYmVyVHlwZSI6Im5vcm1hbCIsIm5vblB1YmxpYyI6e30sIm5vblB1YmxpY0F2YWlsYWJsZSI6dHJ1ZSwicHJvZHVjdHMiOltdLCJ1cmwiOiJodHRwczovL3RyZWxsby5jb20vdS9sdWthc3ozNjc3MzY2OCIsInVzZXJuYW1lIjoibHVrYXN6MzY3NzM2NjgiLCJkYXRlTGFzdEltcHJlc3Npb24iOm51bGwsInN0YXR1cyI6ImRpc2Nvbm5lY3RlZCIsImFhQmxvY2tTeW5jVW50aWwiOm51bGwsImFhRW1haWwiOm51bGwsImFhRW5yb2xsZWREYXRlIjpudWxsLCJhdmF0YXJTb3VyY2UiOm51bGwsImNyZWRlbnRpYWxzUmVtb3ZlZENvdW50IjpudWxsLCJkYXRlTGFzdEFjdGl2ZSI6bnVsbCwiZG9tYWluQ2xhaW1lZCI6bnVsbCwiZW1haWwiOm51bGwsImdyYXZhdGFySGFzaCI6bnVsbCwiaWRCb2FyZHMiOltdLCJpZE9yZ2FuaXphdGlvbnMiOltdLCJpZEVudGVycHJpc2VzQWRtaW4iOltdLCJsaW1pdHMiOnt9LCJsb2dpblR5cGVzIjpudWxsLCJtYXJrZXRpbmdPcHRJbiI6bnVsbCwibWVzc2FnZXNEaXNtaXNzZWQiOm51bGwsIm5vZGVJZCI6ImFyaTpjbG91ZDp0cmVsbG86OnVzZXIvNjNkY2E3N2NiODUyYWM1YTA3YjI0NzIxIiwib25lVGltZU1lc3NhZ2VzRGlzbWlzc2VkIjpudWxsLCJzZXNzaW9uVHlwZSI6bnVsbCwicHJlZnMiOm51bGwsInRyb3BoaWVzIjpbXSwidXBsb2FkZWRBdmF0YXJIYXNoIjpudWxsLCJ1cGxvYWRlZEF2YXRhclVybCI6bnVsbCwicHJlbWl1bUZlYXR1cmVzIjpbXSwiaXNBYU1hc3RlcmVkIjp0cnVlLCJpeFVwZGF0ZSI6bnVsbH0sInVybCI6Imh0dHBzOi8vYXBpLnRyZWxsby5jb20vMS9tZW1iZXJzL2x1a2FzejM2NzczNjY4IiwicmVzcG9uc2VUaW1lIjozNTgsImR1cmF0aW9uIjozNTgsInNpemUiOjExOTQsImlzSHRtbCI6ZmFsc2V9LCJlcnJvciI6bnVsbCwic3RhdHVzIjoicGFzcyIsImFzc2VydGlvblJlc3VsdHMiOlt7InVpZCI6IldRZWRYbEVCbF9MUnVBczUyYWZrMCIsImxoc0V4cHIiOiJyZXMuc3RhdHVzIiwicmhzRXhwciI6ImVxIDIwMCIsInJoc09wZXJhbmQiOiIyMDAiLCJvcGVyYXRvciI6ImVxIiwic3RhdHVzIjoicGFzcyJ9LHsidWlkIjoiVzZxcjdJYmVIOUk4SjlaVTh4WHY0IiwibGhzRXhwciI6InJlcy5ib2R5LnVzZXJuYW1lIiwicmhzRXhwciI6ImVxIHt7dHJlbGxvX3VzZXJuYW1lfX0iLCJyaHNPcGVyYW5kIjoie3t0cmVsbG9fdXNlcm5hbWV9fSIsIm9wZXJhdG9yIjoiZXEiLCJzdGF0dXMiOiJwYXNzIn1dLCJ0ZXN0UmVzdWx0cyI6W3siZGVzY3JpcHRpb24iOiJTdGF0dXMgY29kZSBpcyAyMDAiLCJzdGF0dXMiOiJwYXNzIiwidWlkIjoiMVZkcFBkcjY2MG5xTVNpYkxwS18zIn1dLCJwcmVSZXF1ZXN0VGVzdFJlc3VsdHMiOltdLCJwb3N0UmVzcG9uc2VUZXN0UmVzdWx0cyI6W10sInNob3VsZFN0b3BSdW5uZXJFeGVjdXRpb24iOmZhbHNlLCJydW5EdXJhdGlvbiI6MC41MzY3NTU3LCJuYW1lIjoiZ2V0IG15IG1lbWJlciIsInN1aXRlbmFtZSI6IkM6XFxVc2Vyc1xcY2xhbmNcXE9uZURyaXZlXFxEb2t1bWVudHlcXGJydW5vXFxUcmVsbG9fdjJcXGdldCBteSBtZW1iZXIiLCJwYXRoIjoiZ2V0IG15IG1lbWJlci55bWwiLCJpdGVyYXRpb25JbmRleCI6MH0seyJ0ZXN0Ijp7ImZpbGVuYW1lIjoiQ3JlYXRlIG5ldyBib2FyZC55bWwifSwicmVxdWVzdCI6eyJtZXRob2QiOiJQT1NUIiwidXJsIjoiaHR0cHM6Ly9hcGkudHJlbGxvLmNvbS8xL2JvYXJkcy8/bmFtZT1CcnVubyUyMGJvYXJkJmtleT0yN2I5MTE1YzhhOGU0MjZlYzFjYjFiYTljY2YyZjIwOSZ0b2tlbj1BVFRBNWM4ODk4NGIxYTJmYjU4ZDBhMTcxYzk5ZWJjNzUyM2VmZjk0Y2E0YmVhZTYwNGZmYjY5N2NkNTAwM2ZmZDVlMDAxQ0NDMDdDJnByZWZzX2JhY2tncm91bmQ9b3JhbmdlIiwiaGVhZGVycyI6eyJjb250ZW50LXR5cGUiOm51bGwsIkNvb2tpZSI6IioqKioqKioqIn0sImlzSHRtbCI6ZmFsc2V9LCJyZXNwb25zZSI6eyJzdGF0dXMiOjIwMCwic3RhdHVzVGV4dCI6Ik9LIiwiaGVhZGVycyI6eyJjb250ZW50LXR5cGUiOiJhcHBsaWNhdGlvbi9qc29uOyBjaGFyc2V0PXV0Zi04IiwiY29udGVudC1sZW5ndGgiOiIxNjc4IiwiY29ubmVjdGlvbiI6ImNsb3NlIiwiZGF0ZSI6IkZyaSwgMjYgSnVuIDIwMjYgMTE6NTg6MTggR01UIiwicmVmZXJyZXItcG9saWN5Ijoic3RyaWN0LW9yaWdpbi13aGVuLWNyb3NzLW9yaWdpbiIsIngtZG5zLXByZWZldGNoLWNvbnRyb2wiOiJvZmYiLCJ4LWRvd25sb2FkLW9wdGlvbnMiOiJub29wZW4iLCJ4LWZyYW1lLW9wdGlvbnMiOiJERU5ZIiwieC1wZXJtaXR0ZWQtY3Jvc3MtZG9tYWluLXBvbGljaWVzIjoibm9uZSIsInN1cnJvZ2F0ZS1jb250cm9sIjoibm8tc3RvcmUiLCJjYWNoZS1jb250cm9sIjoibWF4LWFnZT0wLCBtdXN0LXJldmFsaWRhdGUsIG5vLWNhY2hlLCBuby1zdG9yZSIsImV4cGlyZXMiOiJUaHUsIDAxIEphbiAxOTcwIDAwOjAwOjAwIiwieC10cmVsbG8tdmVyc2lvbiI6IjEuNDY5ODA3LjAiLCJ4LXRyZWxsby1lbnZpcm9ubWVudCI6IlByb2R1Y3Rpb24iLCJhY2Nlc3MtY29udHJvbC1hbGxvdy1vcmlnaW4iOiIqIiwiYWNjZXNzLWNvbnRyb2wtYWxsb3ctbWV0aG9kcyI6IkdFVCwgUFVULCBQT1NULCBERUxFVEUiLCJhY2Nlc3MtY29udHJvbC1hbGxvdy1oZWFkZXJzIjoiQXV0aG9yaXphdGlvbiwgQWNjZXB0LCBDb250ZW50LVR5cGUiLCJhY2Nlc3MtY29udHJvbC1leHBvc2UtaGVhZGVycyI6IngtcmF0ZS1saW1pdC1hcGkta2V5LWludGVydmFsLW1zLCB4LXJhdGUtbGltaXQtYXBpLWtleS1tYXgsIHgtcmF0ZS1saW1pdC1hcGkta2V5LXJlbWFpbmluZywgeC1yYXRlLWxpbWl0LWFwaS10b2tlbi1pbnRlcnZhbC1tcywgeC1yYXRlLWxpbWl0LWFwaS10b2tlbi1tYXgsIHgtcmF0ZS1saW1pdC1hcGktdG9rZW4tcmVtYWluaW5nLCByZXRyeS1hZnRlciIsIngtcmF0ZS1saW1pdC1hcGktdG9rZW4taW50ZXJ2YWwtbXMiOiIxMDAwMCIsIngtcmF0ZS1saW1pdC1hcGktdG9rZW4tbWF4IjoiMTAwIiwieC1yYXRlLWxpbWl0LWFwaS10b2tlbi1yZW1haW5pbmciOiI5OSIsIngtcmF0ZS1saW1pdC1kYi1xdWVyeS10aW1lLWludGVydmFsLW1zIjoiNjAwMDAwIiwieC1yYXRlLWxpbWl0LWRiLXF1ZXJ5LXRpbWUtbWF4IjoiNzIwMDAwMCIsIngtcmF0ZS1saW1pdC1kYi1xdWVyeS10aW1lLXJlbWFpbmluZyI6IjcxOTk5OTAiLCJ4LXJhdGUtbGltaXQtYXBpLWtleS1pbnRlcnZhbC1tcyI6IjEwMDAwIiwieC1yYXRlLWxpbWl0LWFwaS1rZXktbWF4IjoiMzAwIiwieC1yYXRlLWxpbWl0LWFwaS1rZXktcmVtYWluaW5nIjoiMjk5IiwieC1yYXRlLWxpbWl0LW1lbWJlci1pbnRlcnZhbC1tcyI6IjEwMDAwIiwieC1yYXRlLWxpbWl0LW1lbWJlci1tYXgiOiIzNzUiLCJ4LXJhdGUtbGltaXQtbWVtYmVyLXJlbWFpbmluZyI6IjM3NCIsIngtc2VydmVyLXRpbWUiOiIxNzgyNDc1MDk4NDIwIiwic2VydmVyIjoiQXRsYXNzaWFuRWRnZSIsIngtY29udGVudC10eXBlLW9wdGlvbnMiOiJub3NuaWZmIiwieC14c3MtcHJvdGVjdGlvbiI6IjE7IG1vZGU9YmxvY2siLCJhdGwtdHJhY2VpZCI6ImM3MTc5NDQ0YzMxMDQ2YmI5ZjkyNjJlNDczZmMxMjIwIiwiYXRsLXJlcXVlc3QtaWQiOiJjNzE3OTQ0NC1jMzEwLTQ2YmItOWY5Mi02MmU0NzNmYzEyMjAiLCJzdHJpY3QtdHJhbnNwb3J0LXNlY3VyaXR5IjoibWF4LWFnZT02MzA3MjAwMDsgcHJlbG9hZCIsInJlcG9ydC10byI6IntcImVuZHBvaW50c1wiOiBbe1widXJsXCI6IFwiaHR0cHM6Ly9kejhhb3Blbmt2djZzLmNsb3VkZnJvbnQubmV0XCJ9XSwgXCJncm91cFwiOiBcImVuZHBvaW50LTFcIiwgXCJpbmNsdWRlX3N1YmRvbWFpbnNcIjogdHJ1ZSwgXCJtYXhfYWdlXCI6IDYwMH0iLCJuZWwiOiJ7XCJmYWlsdXJlX2ZyYWN0aW9uXCI6IDAuMDEsIFwiaW5jbHVkZV9zdWJkb21haW5zXCI6IHRydWUsIFwibWF4X2FnZVwiOiA2MDAsIFwicmVwb3J0X3RvXCI6IFwiZW5kcG9pbnQtMVwifSIsIngtY2FjaGUiOiJNaXNzIGZyb20gY2xvdWRmcm9udCIsInZpYSI6IjEuMSBlMmUzZGFlN2YyNzg4ZTEwMDRhZTcwMGVjNTQ4OGEwNC5jbG91ZGZyb250Lm5ldCAoQ2xvdWRGcm9udCkiLCJ4LWFtei1jZi1wb3AiOiJXQVc1MS1QMiIsImFsdC1zdmMiOiJoMz1cIjo0NDNcIjsgbWE9ODY0MDAiLCJ4LWFtei1jZi1pZCI6ImtnWnNETzdsYkh1bm1CTS1EdGM5V3I3T1VXY0hNbW9KWElmQUVLVjIwMFZzdndab09qcHhQQT09Iiwic2VydmVyLXRpbWluZyI6ImNkbi11cHN0cmVhbS1sYXllcjtkZXNjPVwiRURHRVwiLGNkbi11cHN0cmVhbS1kbnM7ZHVyPTEsY2RuLXVwc3RyZWFtLWNvbm5lY3Q7ZHVyPTAsY2RuLXVwc3RyZWFtLWZibDtkdXI9NTcxLGF0bC1lZGdlO2R1cj01NTEsYXRsLWVkZ2UtaW50ZXJuYWw7ZHVyPTcsYXRsLWVkZ2UtdXBzdHJlYW07ZHVyPTU0NSxhdGwtZWRnZS1wb3A7ZGVzYz1cImF3cy1ldS1jZW50cmFsLTFcIixjZG4tY2FjaGUtbWlzcyxjZG4tcG9wO2Rlc2M9XCJXQVc1MS1QMlwiLGNkbi1yaWQ7ZGVzYz1cImtnWnNETzdsYkh1bm1CTS1EdGM5V3I3T1VXY0hNbW9KWElmQUVLVjIwMFZzdndab09qcHhQQT09XCIsY2RuLWRvd25zdHJlYW0tZmJsO2R1cj01NzUifSwiZGF0YSI6eyJpZCI6IjZhM2U2OTVhZTExMWU4MmUzMmRiZWUxNiIsIm5hbWUiOiJCcnVubyBib2FyZCIsImRlc2MiOiIiLCJkZXNjRGF0YSI6bnVsbCwiY2xvc2VkIjpmYWxzZSwiaWRPcmdhbml6YXRpb24iOiI2M2RjYTc5Yjc5MjhmNzc5Zjg5MzMzZmEiLCJpZEVudGVycHJpc2UiOm51bGwsInBpbm5lZCI6ZmFsc2UsInVybCI6Imh0dHBzOi8vdHJlbGxvLmNvbS9iL29taFVpa3U2L2JydW5vLWJvYXJkIiwic2hvcnRVcmwiOiJodHRwczovL3RyZWxsby5jb20vYi9vbWhVaWt1NiIsInByZWZzIjp7InBlcm1pc3Npb25MZXZlbCI6InByaXZhdGUiLCJoaWRlVm90ZXMiOmZhbHNlLCJ2b3RpbmciOiJkaXNhYmxlZCIsImNvbW1lbnRzIjoibWVtYmVycyIsImludml0YXRpb25zIjoibWVtYmVycyIsInNlbGZKb2luIjp0cnVlLCJjYXJkQ292ZXJzIjp0cnVlLCJzaG93Q29tcGxldGVTdGF0dXMiOnRydWUsImNhcmRDb3VudHMiOmZhbHNlLCJpc1RlbXBsYXRlIjpmYWxzZSwiY2FyZEFnaW5nIjoicmVndWxhciIsImNhbGVuZGFyRmVlZEVuYWJsZWQiOmZhbHNlLCJoaWRkZW5QbHVnaW5Cb2FyZEJ1dHRvbnMiOltdLCJzd2l0Y2hlclZpZXdzIjpbeyJ2aWV3VHlwZSI6IkJvYXJkIiwiZW5hYmxlZCI6dHJ1ZX0seyJ2aWV3VHlwZSI6IlRhYmxlIiwiZW5hYmxlZCI6dHJ1ZX0seyJ2aWV3VHlwZSI6IkNhbGVuZGFyIiwiZW5hYmxlZCI6ZmFsc2V9LHsidmlld1R5cGUiOiJEYXNoYm9hcmQiLCJlbmFibGVkIjpmYWxzZX0seyJ2aWV3VHlwZSI6IlRpbWVsaW5lIiwiZW5hYmxlZCI6ZmFsc2V9LHsidmlld1R5cGUiOiJNYXAiLCJlbmFibGVkIjpmYWxzZX1dLCJhdXRvQXJjaGl2ZSI6bnVsbCwiYmFja2dyb3VuZCI6Im9yYW5nZSIsImJhY2tncm91bmRDb2xvciI6IiNEMjkwMzQiLCJiYWNrZ3JvdW5kRGFya0NvbG9yIjpudWxsLCJiYWNrZ3JvdW5kSW1hZ2UiOm51bGwsImJhY2tncm91bmREYXJrSW1hZ2UiOm51bGwsImJhY2tncm91bmRJbWFnZVNjYWxlZCI6bnVsbCwiYmFja2dyb3VuZFRpbGUiOmZhbHNlLCJiYWNrZ3JvdW5kQnJpZ2h0bmVzcyI6ImRhcmsiLCJzaGFyZWRTb3VyY2VVcmwiOm51bGwsImJhY2tncm91bmRCb3R0b21Db2xvciI6IiNEMjkwMzQiLCJiYWNrZ3JvdW5kVG9wQ29sb3IiOiIjRDI5MDM0IiwiY2FuQmVQdWJsaWMiOnRydWUsImNhbkJlRW50ZXJwcmlzZSI6dHJ1ZSwiY2FuQmVPcmciOnRydWUsImNhbkJlUHJpdmF0ZSI6dHJ1ZSwiY2FuSW52aXRlIjp0cnVlfSwibGFiZWxOYW1lcyI6eyJncmVlbiI6IiIsInllbGxvdyI6IiIsIm9yYW5nZSI6IiIsInJlZCI6IiIsInB1cnBsZSI6IiIsImJsdWUiOiIiLCJza3kiOiIiLCJsaW1lIjoiIiwicGluayI6IiIsImJsYWNrIjoiIiwiZ3JlZW5fZGFyayI6IiIsInllbGxvd19kYXJrIjoiIiwib3JhbmdlX2RhcmsiOiIiLCJyZWRfZGFyayI6IiIsInB1cnBsZV9kYXJrIjoiIiwiYmx1ZV9kYXJrIjoiIiwic2t5X2RhcmsiOiIiLCJsaW1lX2RhcmsiOiIiLCJwaW5rX2RhcmsiOiIiLCJibGFja19kYXJrIjoiIiwiZ3JlZW5fbGlnaHQiOiIiLCJ5ZWxsb3dfbGlnaHQiOiIiLCJvcmFuZ2VfbGlnaHQiOiIiLCJyZWRfbGlnaHQiOiIiLCJwdXJwbGVfbGlnaHQiOiIiLCJibHVlX2xpZ2h0IjoiIiwic2t5X2xpZ2h0IjoiIiwibGltZV9saWdodCI6IiIsInBpbmtfbGlnaHQiOiIiLCJibGFja19saWdodCI6IiJ9LCJsaW1pdHMiOnt9fSwidXJsIjoiaHR0cHM6Ly9hcGkudHJlbGxvLmNvbS8xL2JvYXJkcy8/bmFtZT1CcnVubyUyMGJvYXJkJmtleT0yN2I5MTE1YzhhOGU0MjZlYzFjYjFiYTljY2YyZjIwOSZ0b2tlbj1BVFRBNWM4ODk4NGIxYTJmYjU4ZDBhMTcxYzk5ZWJjNzUyM2VmZjk0Y2E0YmVhZTYwNGZmYjY5N2NkNTAwM2ZmZDVlMDAxQ0NDMDdDJnByZWZzX2JhY2tncm91bmQ9b3JhbmdlIiwicmVzcG9uc2VUaW1lIjo3MzIsImR1cmF0aW9uIjo3MzIsInNpemUiOjE2NzgsImlzSHRtbCI6ZmFsc2V9LCJlcnJvciI6bnVsbCwic3RhdHVzIjoicGFzcyIsImFzc2VydGlvblJlc3VsdHMiOlt7InVpZCI6Inp0OTZGb0FQTkh4X0xVdE1RakNpMiIsImxoc0V4cHIiOiJyZXMuYm9keS5uYW1lIiwicmhzRXhwciI6ImVxIEJydW5vIGJvYXJkIiwicmhzT3BlcmFuZCI6IkJydW5vIGJvYXJkIiwib3BlcmF0b3IiOiJlcSIsInN0YXR1cyI6InBhc3MifSx7InVpZCI6IkRwVnlLbUotb2h0Y0tpTUlTMWlubSIsImxoc0V4cHIiOiJyZXMuYm9keS5jbG9zZWQiLCJyaHNFeHByIjoiaXNCb29sZWFuIiwicmhzT3BlcmFuZCI6IiIsIm9wZXJhdG9yIjoiaXNCb29sZWFuIiwic3RhdHVzIjoicGFzcyJ9XSwidGVzdFJlc3VsdHMiOltdLCJwcmVSZXF1ZXN0VGVzdFJlc3VsdHMiOltdLCJwb3N0UmVzcG9uc2VUZXN0UmVzdWx0cyI6W10sInNob3VsZFN0b3BSdW5uZXJFeGVjdXRpb24iOmZhbHNlLCJydW5EdXJhdGlvbiI6MC43NDUwNDY2LCJuYW1lIjoiQ3JlYXRlIG5ldyBib2FyZCIsInN1aXRlbmFtZSI6IkM6XFxVc2Vyc1xcY2xhbmNcXE9uZURyaXZlXFxEb2t1bWVudHlcXGJydW5vXFxUcmVsbG9fdjJcXENyZWF0ZSBuZXcgYm9hcmQiLCJwYXRoIjoiQ3JlYXRlIG5ldyBib2FyZC55bWwiLCJpdGVyYXRpb25JbmRleCI6MH0seyJ0ZXN0Ijp7ImZpbGVuYW1lIjoiRGVsZXRlIGJvYXJkLnltbCJ9LCJyZXF1ZXN0Ijp7Im1ldGhvZCI6IkRFTEVURSIsInVybCI6Imh0dHBzOi8vYXBpLnRyZWxsby5jb20vMS9ib2FyZHMvNmEzZTY5NWFlMTExZTgyZTMyZGJlZTE2P2tleT0yN2I5MTE1YzhhOGU0MjZlYzFjYjFiYTljY2YyZjIwOSZ0b2tlbj1BVFRBNWM4ODk4NGIxYTJmYjU4ZDBhMTcxYzk5ZWJjNzUyM2VmZjk0Y2E0YmVhZTYwNGZmYjY5N2NkNTAwM2ZmZDVlMDAxQ0NDMDdDIiwiaGVhZGVycyI6eyJjb250ZW50LXR5cGUiOm51bGwsIkNvb2tpZSI6IioqKioqKioqIn0sImlzSHRtbCI6ZmFsc2V9LCJyZXNwb25zZSI6eyJzdGF0dXMiOjIwMCwic3RhdHVzVGV4dCI6Ik9LIiwiaGVhZGVycyI6eyJjb250ZW50LXR5cGUiOiJhcHBsaWNhdGlvbi9qc29uOyBjaGFyc2V0PXV0Zi04IiwiY29udGVudC1sZW5ndGgiOiIxNiIsImNvbm5lY3Rpb24iOiJjbG9zZSIsImRhdGUiOiJGcmksIDI2IEp1biAyMDI2IDExOjU4OjE5IEdNVCIsInJlZmVycmVyLXBvbGljeSI6InN0cmljdC1vcmlnaW4td2hlbi1jcm9zcy1vcmlnaW4iLCJ4LWRucy1wcmVmZXRjaC1jb250cm9sIjoib2ZmIiwieC1kb3dubG9hZC1vcHRpb25zIjoibm9vcGVuIiwieC1mcmFtZS1vcHRpb25zIjoiREVOWSIsIngtcGVybWl0dGVkLWNyb3NzLWRvbWFpbi1wb2xpY2llcyI6Im5vbmUiLCJzdXJyb2dhdGUtY29udHJvbCI6Im5vLXN0b3JlIiwiY2FjaGUtY29udHJvbCI6Im1heC1hZ2U9MCwgbXVzdC1yZXZhbGlkYXRlLCBuby1jYWNoZSwgbm8tc3RvcmUiLCJleHBpcmVzIjoiVGh1LCAwMSBKYW4gMTk3MCAwMDowMDowMCIsIngtdHJlbGxvLXZlcnNpb24iOiIxLjQ2OTgwNy4wIiwieC10cmVsbG8tZW52aXJvbm1lbnQiOiJQcm9kdWN0aW9uIiwiYWNjZXNzLWNvbnRyb2wtYWxsb3ctb3JpZ2luIjoiKiIsImFjY2Vzcy1jb250cm9sLWFsbG93LW1ldGhvZHMiOiJHRVQsIFBVVCwgUE9TVCwgREVMRVRFIiwiYWNjZXNzLWNvbnRyb2wtYWxsb3ctaGVhZGVycyI6IkF1dGhvcml6YXRpb24sIEFjY2VwdCwgQ29udGVudC1UeXBlIiwiYWNjZXNzLWNvbnRyb2wtZXhwb3NlLWhlYWRlcnMiOiJ4LXJhdGUtbGltaXQtYXBpLWtleS1pbnRlcnZhbC1tcywgeC1yYXRlLWxpbWl0LWFwaS1rZXktbWF4LCB4LXJhdGUtbGltaXQtYXBpLWtleS1yZW1haW5pbmcsIHgtcmF0ZS1saW1pdC1hcGktdG9rZW4taW50ZXJ2YWwtbXMsIHgtcmF0ZS1saW1pdC1hcGktdG9rZW4tbWF4LCB4LXJhdGUtbGltaXQtYXBpLXRva2VuLXJlbWFpbmluZywgcmV0cnktYWZ0ZXIiLCJ4LXJhdGUtbGltaXQtYXBpLXRva2VuLWludGVydmFsLW1zIjoiMTAwMDAiLCJ4LXJhdGUtbGltaXQtYXBpLXRva2VuLW1heCI6IjEwMCIsIngtcmF0ZS1saW1pdC1hcGktdG9rZW4tcmVtYWluaW5nIjoiOTgiLCJ4LXJhdGUtbGltaXQtZGItcXVlcnktdGltZS1pbnRlcnZhbC1tcyI6IjYwMDAwMCIsIngtcmF0ZS1saW1pdC1kYi1xdWVyeS10aW1lLW1heCI6IjcyMDAwMDAiLCJ4LXJhdGUtbGltaXQtZGItcXVlcnktdGltZS1yZW1haW5pbmciOiI3MTk5OTkwIiwieC1yYXRlLWxpbWl0LWFwaS1rZXktaW50ZXJ2YWwtbXMiOiIxMDAwMCIsIngtcmF0ZS1saW1pdC1hcGkta2V5LW1heCI6IjMwMCIsIngtcmF0ZS1saW1pdC1hcGkta2V5LXJlbWFpbmluZyI6IjI5OCIsIngtcmF0ZS1saW1pdC1tZW1iZXItaW50ZXJ2YWwtbXMiOiIxMDAwMCIsIngtcmF0ZS1saW1pdC1tZW1iZXItbWF4IjoiMzc1IiwieC1yYXRlLWxpbWl0LW1lbWJlci1yZW1haW5pbmciOiIzNzMiLCJ4LXNlcnZlci10aW1lIjoiMTc4MjQ3NTA5OTI5OCIsInNlcnZlciI6IkF0bGFzc2lhbkVkZ2UiLCJ4LWNvbnRlbnQtdHlwZS1vcHRpb25zIjoibm9zbmlmZiIsIngteHNzLXByb3RlY3Rpb24iOiIxOyBtb2RlPWJsb2NrIiwiYXRsLXRyYWNlaWQiOiI3MGIyOGIxOWY4YTU0OWMxOGVmMWEwNDgyZjk4YmRjYyIsImF0bC1yZXF1ZXN0LWlkIjoiNzBiMjhiMTktZjhhNS00OWMxLThlZjEtYTA0ODJmOThiZGNjIiwic3RyaWN0LXRyYW5zcG9ydC1zZWN1cml0eSI6Im1heC1hZ2U9NjMwNzIwMDA7IHByZWxvYWQiLCJyZXBvcnQtdG8iOiJ7XCJlbmRwb2ludHNcIjogW3tcInVybFwiOiBcImh0dHBzOi8vZHo4YW9wZW5rdnY2cy5jbG91ZGZyb250Lm5ldFwifV0sIFwiZ3JvdXBcIjogXCJlbmRwb2ludC0xXCIsIFwiaW5jbHVkZV9zdWJkb21haW5zXCI6IHRydWUsIFwibWF4X2FnZVwiOiA2MDB9IiwibmVsIjoie1wiZmFpbHVyZV9mcmFjdGlvblwiOiAwLjAxLCBcImluY2x1ZGVfc3ViZG9tYWluc1wiOiB0cnVlLCBcIm1heF9hZ2VcIjogNjAwLCBcInJlcG9ydF90b1wiOiBcImVuZHBvaW50LTFcIn0iLCJ4LWNhY2hlIjoiTWlzcyBmcm9tIGNsb3VkZnJvbnQiLCJ2aWEiOiIxLjEgNDQ0Yzg2NzgwY2U5OWQyZmM3MjkyMDhhMjVjYjZhYTIuY2xvdWRmcm9udC5uZXQgKENsb3VkRnJvbnQpIiwieC1hbXotY2YtcG9wIjoiV0FXNTEtUDIiLCJhbHQtc3ZjIjoiaDM9XCI6NDQzXCI7IG1hPTg2NDAwIiwieC1hbXotY2YtaWQiOiJ2Ul9kVFcyaW1Qc3NEclc3Z193Q1RlQjkzWnMyUm9Bb3pHMXdiaGVBSUt0Rjh1V0E4M0tTQ2c9PSIsInNlcnZlci10aW1pbmciOiJjZG4tdXBzdHJlYW0tbGF5ZXI7ZGVzYz1cIkVER0VcIixjZG4tdXBzdHJlYW0tZG5zO2R1cj0wLGNkbi11cHN0cmVhbS1jb25uZWN0O2R1cj0wLGNkbi11cHN0cmVhbS1mYmw7ZHVyPTcxNixhdGwtZWRnZTtkdXI9Njk2LGF0bC1lZGdlLWludGVybmFsO2R1cj05LGF0bC1lZGdlLXVwc3RyZWFtO2R1cj02ODksYXRsLWVkZ2UtcG9wO2Rlc2M9XCJhd3MtZXUtY2VudHJhbC0xXCIsY2RuLWNhY2hlLW1pc3MsY2RuLXBvcDtkZXNjPVwiV0FXNTEtUDJcIixjZG4tcmlkO2Rlc2M9XCJ2Ul9kVFcyaW1Qc3NEclc3Z193Q1RlQjkzWnMyUm9Bb3pHMXdiaGVBSUt0Rjh1V0E4M0tTQ2c9PVwiLGNkbi1kb3duc3RyZWFtLWZibDtkdXI9NzIyIn0sImRhdGEiOnsiX3ZhbHVlIjpudWxsfSwidXJsIjoiaHR0cHM6Ly9hcGkudHJlbGxvLmNvbS8xL2JvYXJkcy82YTNlNjk1YWUxMTFlODJlMzJkYmVlMTY/a2V5PTI3YjkxMTVjOGE4ZTQyNmVjMWNiMWJhOWNjZjJmMjA5JnRva2VuPUFUVEE1Yzg4OTg0YjFhMmZiNThkMGExNzFjOTllYmM3NTIzZWZmOTRjYTRiZWFlNjA0ZmZiNjk3Y2Q1MDAzZmZkNWUwMDFDQ0MwN0MiLCJyZXNwb25zZVRpbWUiOjg2MywiZHVyYXRpb24iOjg2Mywic2l6ZSI6MTYsImlzSHRtbCI6ZmFsc2V9LCJlcnJvciI6bnVsbCwic3RhdHVzIjoicGFzcyIsImFzc2VydGlvblJlc3VsdHMiOlt7InVpZCI6IkRMN0RGa2lXTGJJeFZKY3p3WVZoVCIsImxoc0V4cHIiOiJyZXMuYm9keS5fdmFsdWUiLCJyaHNFeHByIjoiaXNOdWxsIiwicmhzT3BlcmFuZCI6IiIsIm9wZXJhdG9yIjoiaXNOdWxsIiwic3RhdHVzIjoicGFzcyJ9LHsidWlkIjoiWXRWOWZyV0dXVW5wSm9kRDUzbV9VIiwibGhzRXhwciI6InJlcy5zdGF0dXMiLCJyaHNFeHByIjoiZXEgMjAwIiwicmhzT3BlcmFuZCI6IjIwMCIsIm9wZXJhdG9yIjoiZXEiLCJzdGF0dXMiOiJwYXNzIn1dLCJ0ZXN0UmVzdWx0cyI6W10sInByZVJlcXVlc3RUZXN0UmVzdWx0cyI6W10sInBvc3RSZXNwb25zZVRlc3RSZXN1bHRzIjpbXSwic2hvdWxkU3RvcFJ1bm5lckV4ZWN1dGlvbiI6ZmFsc2UsInJ1bkR1cmF0aW9uIjowLjg3NjU5NzQsIm5hbWUiOiJEZWxldGUgYm9hcmQiLCJzdWl0ZW5hbWUiOiJDOlxcVXNlcnNcXGNsYW5jXFxPbmVEcml2ZVxcRG9rdW1lbnR5XFxicnVub1xcVHJlbGxvX3YyXFxEZWxldGUgYm9hcmQiLCJwYXRoIjoiRGVsZXRlIGJvYXJkLnltbCIsIml0ZXJhdGlvbkluZGV4IjowfSx7InRlc3QiOnsiZmlsZW5hbWUiOiJHZXQgZGVsZXRlZCBib2FyZC55bWwifSwicmVxdWVzdCI6eyJtZXRob2QiOiJHRVQiLCJ1cmwiOiJodHRwczovL2FwaS50cmVsbG8uY29tLzEvYm9hcmRzLzZhM2U2OTVhZTExMWU4MmUzMmRiZWUxNj9rZXk9MjdiOTExNWM4YThlNDI2ZWMxY2IxYmE5Y2NmMmYyMDkmdG9rZW49QVRUQTVjODg5ODRiMWEyZmI1OGQwYTE3MWM5OWViYzc1MjNlZmY5NGNhNGJlYWU2MDRmZmI2OTdjZDUwMDNmZmQ1ZTAwMUNDQzA3QyIsImhlYWRlcnMiOnsiY29udGVudC10eXBlIjpudWxsLCJDb29raWUiOiIqKioqKioqKiJ9LCJpc0h0bWwiOmZhbHNlfSwicmVzcG9uc2UiOnsic3RhdHVzIjo0MDQsInN0YXR1c1RleHQiOiJOb3QgRm91bmQiLCJoZWFkZXJzIjp7ImNvbnRlbnQtdHlwZSI6InRleHQvcGxhaW47IGNoYXJzZXQ9dXRmLTgiLCJjb250ZW50LWxlbmd0aCI6IjM3IiwiY29ubmVjdGlvbiI6ImNsb3NlIiwiZGF0ZSI6IkZyaSwgMjYgSnVuIDIwMjYgMTE6NTg6MTkgR01UIiwicmVmZXJyZXItcG9saWN5Ijoic3RyaWN0LW9yaWdpbi13aGVuLWNyb3NzLW9yaWdpbiIsIngtZG5zLXByZWZldGNoLWNvbnRyb2wiOiJvZmYiLCJ4LWRvd25sb2FkLW9wdGlvbnMiOiJub29wZW4iLCJ4LWZyYW1lLW9wdGlvbnMiOiJERU5ZIiwieC1wZXJtaXR0ZWQtY3Jvc3MtZG9tYWluLXBvbGljaWVzIjoibm9uZSIsInN1cnJvZ2F0ZS1jb250cm9sIjoibm8tc3RvcmUiLCJjYWNoZS1jb250cm9sIjoibm8tc3RvcmUsIG5vLWNhY2hlLCBtdXN0LXJldmFsaWRhdGUsIHByb3h5LXJldmFsaWRhdGUiLCJleHBpcmVzIjoiMCIsIngtdHJlbGxvLXZlcnNpb24iOiIxLjQ2OTgwNy4wIiwieC10cmVsbG8tZW52aXJvbm1lbnQiOiJQcm9kdWN0aW9uIiwiYWNjZXNzLWNvbnRyb2wtYWxsb3ctb3JpZ2luIjoiKiIsImFjY2Vzcy1jb250cm9sLWFsbG93LW1ldGhvZHMiOiJHRVQsIFBVVCwgUE9TVCwgREVMRVRFIiwiYWNjZXNzLWNvbnRyb2wtYWxsb3ctaGVhZGVycyI6IkF1dGhvcml6YXRpb24sIEFjY2VwdCwgQ29udGVudC1UeXBlIiwiYWNjZXNzLWNvbnRyb2wtZXhwb3NlLWhlYWRlcnMiOiJ4LXJhdGUtbGltaXQtYXBpLWtleS1pbnRlcnZhbC1tcywgeC1yYXRlLWxpbWl0LWFwaS1rZXktbWF4LCB4LXJhdGUtbGltaXQtYXBpLWtleS1yZW1haW5pbmcsIHgtcmF0ZS1saW1pdC1hcGktdG9rZW4taW50ZXJ2YWwtbXMsIHgtcmF0ZS1saW1pdC1hcGktdG9rZW4tbWF4LCB4LXJhdGUtbGltaXQtYXBpLXRva2VuLXJlbWFpbmluZywgcmV0cnktYWZ0ZXIiLCJ4LXJhdGUtbGltaXQtYXBpLXRva2VuLWludGVydmFsLW1zIjoiMTAwMDAiLCJ4LXJhdGUtbGltaXQtYXBpLXRva2VuLW1heCI6IjEwMCIsIngtcmF0ZS1saW1pdC1hcGktdG9rZW4tcmVtYWluaW5nIjoiOTciLCJ4LXJhdGUtbGltaXQtZGItcXVlcnktdGltZS1pbnRlcnZhbC1tcyI6IjYwMDAwMCIsIngtcmF0ZS1saW1pdC1kYi1xdWVyeS10aW1lLW1heCI6IjcyMDAwMDAiLCJ4LXJhdGUtbGltaXQtZGItcXVlcnktdGltZS1yZW1haW5pbmciOiI3MTk5OTkwIiwieC1yYXRlLWxpbWl0LWFwaS1rZXktaW50ZXJ2YWwtbXMiOiIxMDAwMCIsIngtcmF0ZS1saW1pdC1hcGkta2V5LW1heCI6IjMwMCIsIngtcmF0ZS1saW1pdC1hcGkta2V5LXJlbWFpbmluZyI6IjI5NyIsIngtcmF0ZS1saW1pdC1tZW1iZXItaW50ZXJ2YWwtbXMiOiIxMDAwMCIsIngtcmF0ZS1saW1pdC1tZW1iZXItbWF4IjoiMzc1IiwieC1yYXRlLWxpbWl0LW1lbWJlci1yZW1haW5pbmciOiIzNzEiLCJzZXJ2ZXIiOiJBdGxhc3NpYW5FZGdlIiwieC1jb250ZW50LXR5cGUtb3B0aW9ucyI6Im5vc25pZmYiLCJ4LXhzcy1wcm90ZWN0aW9uIjoiMTsgbW9kZT1ibG9jayIsImF0bC10cmFjZWlkIjoiNWQ5NzI3M2Q5ZTRmNDUwZTk2NTE0NDE4MDJiOWQwMzQiLCJhdGwtcmVxdWVzdC1pZCI6IjVkOTcyNzNkLTllNGYtNDUwZS05NjUxLTQ0MTgwMmI5ZDAzNCIsInN0cmljdC10cmFuc3BvcnQtc2VjdXJpdHkiOiJtYXgtYWdlPTYzMDcyMDAwOyBwcmVsb2FkIiwicmVwb3J0LXRvIjoie1wiZW5kcG9pbnRzXCI6IFt7XCJ1cmxcIjogXCJodHRwczovL2R6OGFvcGVua3Z2NnMuY2xvdWRmcm9udC5uZXRcIn1dLCBcImdyb3VwXCI6IFwiZW5kcG9pbnQtMVwiLCBcImluY2x1ZGVfc3ViZG9tYWluc1wiOiB0cnVlLCBcIm1heF9hZ2VcIjogNjAwfSIsIm5lbCI6IntcImZhaWx1cmVfZnJhY3Rpb25cIjogMC4wMSwgXCJpbmNsdWRlX3N1YmRvbWFpbnNcIjogdHJ1ZSwgXCJtYXhfYWdlXCI6IDYwMCwgXCJyZXBvcnRfdG9cIjogXCJlbmRwb2ludC0xXCJ9Iiwic2VydmVyLXRpbWluZyI6ImF0bC1lZGdlO2R1cj0xMzUsYXRsLWVkZ2UtaW50ZXJuYWw7ZHVyPTgsYXRsLWVkZ2UtdXBzdHJlYW07ZHVyPTEyOSxhdGwtZWRnZS1wb3A7ZGVzYz1cImF3cy1ldS1jZW50cmFsLTFcIiIsIngtY2FjaGUiOiJFcnJvciBmcm9tIGNsb3VkZnJvbnQiLCJ2aWEiOiIxLjEgYmI0NzJkZjQ5YjBiZmM4Yjc2ZDFiMzE3YmQ3MzcxNDYuY2xvdWRmcm9udC5uZXQgKENsb3VkRnJvbnQpIiwieC1hbXotY2YtcG9wIjoiV0FXNTEtUDIiLCJhbHQtc3ZjIjoiaDM9XCI6NDQzXCI7IG1hPTg2NDAwIiwieC1hbXotY2YtaWQiOiJaWUJ6ajB2UlVwd0JKWTh0b1FMRXZZZ3J3ejc4bXFnajVkS1NwWHNZa3U4SUs1VGRHSjkwUWc9PSJ9LCJkYXRhIjoiVGhlIHJlcXVlc3RlZCByZXNvdXJjZSB3YXMgbm90IGZvdW5kLiIsInVybCI6Imh0dHBzOi8vYXBpLnRyZWxsby5jb20vMS9ib2FyZHMvNmEzZTY5NWFlMTExZTgyZTMyZGJlZTE2P2tleT0yN2I5MTE1YzhhOGU0MjZlYzFjYjFiYTljY2YyZjIwOSZ0b2tlbj1BVFRBNWM4ODk4NGIxYTJmYjU4ZDBhMTcxYzk5ZWJjNzUyM2VmZjk0Y2E0YmVhZTYwNGZmYjY5N2NkNTAwM2ZmZDVlMDAxQ0NDMDdDIiwicmVzcG9uc2VUaW1lIjoyOTUsImR1cmF0aW9uIjoyOTUsInNpemUiOjM3LCJpc0h0bWwiOmZhbHNlfSwiZXJyb3IiOm51bGwsInN0YXR1cyI6InBhc3MiLCJhc3NlcnRpb25SZXN1bHRzIjpbeyJ1aWQiOiJCNDFvUDhiYi1aVzg4VEFlWVpEbmIiLCJsaHNFeHByIjoicmVzLnN0YXR1cyIsInJoc0V4cHIiOiJlcSA0MDQiLCJyaHNPcGVyYW5kIjoiNDA0Iiwib3BlcmF0b3IiOiJlcSIsInN0YXR1cyI6InBhc3MifV0sInRlc3RSZXN1bHRzIjpbXSwicHJlUmVxdWVzdFRlc3RSZXN1bHRzIjpbXSwicG9zdFJlc3BvbnNlVGVzdFJlc3VsdHMiOltdLCJzaG91bGRTdG9wUnVubmVyRXhlY3V0aW9uIjpmYWxzZSwicnVuRHVyYXRpb24iOjAuMzAyNTYxMSwibmFtZSI6IkdldCBkZWxldGVkIGJvYXJkIiwic3VpdGVuYW1lIjoiQzpcXFVzZXJzXFxjbGFuY1xcT25lRHJpdmVcXERva3VtZW50eVxcYnJ1bm9cXFRyZWxsb192MlxcR2V0IGRlbGV0ZWQgYm9hcmQiLCJwYXRoIjoiR2V0IGRlbGV0ZWQgYm9hcmQueW1sIiwiaXRlcmF0aW9uSW5kZXgiOjB9XSwic3VtbWFyeSI6eyJ0b3RhbFJlcXVlc3RzIjo0LCJwYXNzZWRSZXF1ZXN0cyI6NCwiZmFpbGVkUmVxdWVzdHMiOjAsImVycm9yUmVxdWVzdHMiOjAsInNraXBwZWRSZXF1ZXN0cyI6MCwic2tpcHBlZEJ5QmFpbCI6MCwidG90YWxBc3NlcnRpb25zIjo3LCJwYXNzZWRBc3NlcnRpb25zIjo3LCJmYWlsZWRBc3NlcnRpb25zIjowLCJ0b3RhbFRlc3RzIjoxLCJwYXNzZWRUZXN0cyI6MSwiZmFpbGVkVGVzdHMiOjAsInRvdGFsUHJlUmVxdWVzdFRlc3RzIjowLCJwYXNzZWRQcmVSZXF1ZXN0VGVzdHMiOjAsImZhaWxlZFByZVJlcXVlc3RUZXN0cyI6MCwidG90YWxQb3N0UmVzcG9uc2VUZXN0cyI6MCwicGFzc2VkUG9zdFJlc3BvbnNlVGVzdHMiOjAsImZhaWxlZFBvc3RSZXNwb25zZVRlc3RzIjowfX1dLCJ2ZXJzaW9uIjoidXNlYnJ1bm8gdjMuNS4wIiwiZW52aXJvbm1lbnQiOiJ0cmVsbG9fdjIiLCJydW5Db21wbGV0aW9uVGltZSI6IjIwMjYtMDYtMjZUMTE6NTg6MTguMjU2WiJ9'));
+
+          const res = computed(() => {
+            return mergeTests(rawResults.results);
+          });
+
+          const brunoVersion = computed(() => {
+            return rawResults.version || '-';
+          });
+
+          const environment = computed(() => {
+            return rawResults.environment || '-';
+          });
+
+          const runCompletionTime = computed(() => {
+            if (rawResults.runCompletionTime) {
+              return new Date(rawResults.runCompletionTime).toLocaleString();
+            }
+            return '-';
+          });
+
+          const currentTab = ref('summary');
+
+          const getTabFromQueryParam = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            return tab && ['summary', 'requests'].includes(tab) ? tab : 'summary';
+          };
+
+          onMounted(() => {
+            currentTab.value = getTabFromQueryParam();
+          });
+
+          const darkMode = ref(false);
+          const theme = computed(() => {
+            return darkMode.value ? naive.darkTheme : null;
+          });
+
+          const totalDuration = computed(() => {
+            const total = res.value.reduce((totalTime, iteration) => {
+              return totalTime + iteration.results.reduce((sum, result) => sum + (result.runDuration || 0), 0);
+            }, 0);
+            return total > 0 ? Math.round(total * 1000) / 1000 + 's' : '-';
+          });
+
+          const totalDataReceived = computed(() => {
+            const bytes = res.value.reduce((total, iteration) => {
+              return total + iteration.results.reduce((sum, result) => {
+                const responseData = result.response?.data;
+                if (typeof responseData === 'string') {
+                  return sum + new Blob([responseData]).size;
+                }
+                return sum + (JSON.stringify(responseData || {}).length || 0);
+              }, 0);
+            }, 0);
+            
+            if (bytes === 0) return '-';
+            if (bytes < 1024) return bytes + 'B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + 'KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + 'MB';
+          });
+
+          const averageResponseTime = computed(() => {
+            let totalTime = 0;
+            let count = 0;
+            
+            res.value.forEach(iteration => {
+              iteration.results.forEach(result => {
+                if (result.response?.responseTime) {
+                  totalTime += result.response.responseTime;
+                  count++;
+                }
+              });
+            });
+            
+            return count > 0 ? Math.round(totalTime / count) + 'ms' : '-';
+          });
+
+          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            darkMode.value = true;
+          }
+          // To watch for os theme changes
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+            darkMode.value = event.matches;
+          });
+          return {
+            res,
+            theme,
+            darkMode,
+            darkModeRailStyle: () => ({ background: 'var(--n-rail-color)' }),
+            currentTab,
+            brunoVersion,
+            environment,
+            totalDuration,
+            totalDataReceived,
+            averageResponseTime,
+            runCompletionTime
+          };
+        }
+      };
+      const app = Vue.createApp(App);
+
+      app.component('x-summary', {
+        template: '#summary-component',
+        props: ['res'],
+        setup(props) {
+          const summaryColumns = [
+            {
+              title: 'SUMMARY ITEM',
+              key: 'title'
+            },
+            {
+              title: 'TOTAL',
+              key: 'total'
+            },
+            {
+              title: 'PASSED',
+              key: 'passed'
+            },
+            {
+              title: 'FAILED',
+              key: 'failed'
+            },
+            {
+              title: 'SKIPPED',
+              key: 'skipped'
+            },
+            {
+              title: 'ERROR',
+              key: 'error'
+            }
+          ];
+          const summaryData = computed(() => [
+            {
+              title: 'Requests',
+              total: props.res.summary.totalRequests,
+              passed: props.res.summary.passedRequests,
+              failed: props.res.summary.failedRequests,
+              skipped: props.res.summary.skippedRequests,
+              error: props.res.summary.errorRequests
+            },
+            {
+              title: 'Assertions',
+              total: props.res.summary.totalAssertions,
+              passed: props.res.summary.passedAssertions,
+              failed: props.res.summary.failedAssertions,
+              skipped: '-',
+              error: '-'
+            },
+            {
+              title: 'Tests',
+              total: props.res.summary.totalTests,
+              passed: props.res.summary.passedTests,
+              failed: props.res.summary.failedTests,
+              skipped: '-',
+              error: '-'
+            }
+          ]);
+          const summaryTotalRequests = computed(() => {
+            return props.res.summary.totalRequests;
+          });
+          const summaryTotalControls = computed(() => {
+            return props.res.summary.totalTests + props.res.summary.totalAssertions;
+          });
+          const summaryFailedControls = computed(
+            () => props.res.summary.failedTests + props.res.summary.failedAssertions
+          );
+          const summarySkippedRequests = computed(() => props?.res?.summary?.skippedRequests || 0);
+          const summaryErrors = computed(() => props?.res?.results?.filter((r) => r.error || r.status === 'error').length) || 0;
+          const totalRunDuration = computed(() => props.res?.results?.reduce((total, result) => result.runDuration + total, 0));
+          const iterationIndex = Number(props.res.iterationIndex) + 1;
+          return {
+            summaryColumns,
+            summaryData,
+            summaryTotalControls,
+            summaryTotalRequests,
+            summaryFailedControls,
+            summarySkippedRequests,
+            summaryErrors,
+            totalRunDuration,
+            iterationTitle: 'Iteration ' + iterationIndex
+          };
+        }
+      });
+
+      app.component('x-requests', {
+        template: '#requests-component',
+        props: ['res'],
+        setup(props) {
+          const onlyFailed = ref(false);
+          const filteredResults = computed(() => {
+            return getFilteredRequestResults(props?.res?.results, onlyFailed.value);
+          });
+          const iterationIndex = Number(props.res.iterationIndex) + 1;
+          return {
+            onlyFailed,
+            results: filteredResults,
+            railStyle: ({ checked }) => {
+              const style = {};
+              if (checked) {
+                style.background = '#d03050';
+              }
+              return style;
+            },
+            iterationTitle: 'Iteration ' + iterationIndex
+          };
+        }
+      });
+
+      app.component('x-result', {
+        template: '#result-component',
+        props: ['result', 'index'],
+        setup(props) {
+          const headerColumns = [
+            {
+              title: 'Header Name',
+              key: 'name',
+              className: 'min-width-150'
+            },
+            {
+              title: 'Header Value',
+              key: 'value'
+            }
+          ];
+          const assertionsColumns = [
+            {
+              title: 'Expression',
+              key: 'lhsExpr'
+            },
+            {
+              title: 'Operator',
+              key: 'operator'
+            },
+            {
+              title: 'Operand',
+              key: 'rhsOperand'
+            },
+            {
+              title: 'Status',
+              key: 'status',
+              className: 'status'
+            },
+            {
+              title: 'Error',
+              key: 'error'
+            }
+          ];
+          const assertionsRowClassName = (row) => {
+            return row.status === 'fail' ? 'error' : 'success';
+          };
+          const testsRowClassName = (row) => {
+            if (row.status === 'skipped') return 'skipped';
+            return row.status === 'fail' ? 'error' : 'success';
+          };
+          const testsColumns = [
+            {
+              title: 'Description',
+              key: 'description'
+            },
+            {
+              title: 'Status',
+              key: 'status',
+              className: 'status'
+            },
+            {
+              title: 'Error',
+              key: 'error'
+            }
+          ];
+
+          function mapHeaderToTableData(headers) {
+            if (!headers) {
+              return [];
+            }
+            return Object.keys(headers).map((name) => ({
+              name,
+              value: headers[name]
+            }));
+          }
+          const headerDataRequest = computed(() => {
+            return mapHeaderToTableData(props?.result?.request?.headers);
+          });
+          const headerDataResponse = computed(() => {
+            return mapHeaderToTableData(props?.result?.response?.headers);
+          });
+          const totalPassed = computed(() => {
+            return (
+              (props?.result?.testResults?.filter((t) => t.status === 'pass').length || 0) +
+              (props?.result?.assertionResults?.filter((t) => t.status === 'pass').length || 0)
+            );
+          });
+          const total = computed(() => {
+            return (props?.result?.testResults?.length || 0) + (props?.result?.assertionResults?.length || 0);
+          });
+
+          const hasError = computed(() => !!props?.result?.error || props?.result?.status === 'error' || (props?.result?.response?.status === 'skipped' && props?.result?.error));
+          const hasFailure = computed(() => total.value !== totalPassed.value);
+          const testDuration = computed(() => Math.round(props?.result?.runDuration * 1000) + ' ms');
+          const resultTitle = computed(() => props?.result?.path + ' ' + props?.result?.response?.status + ' ' + props?.result?.response?.statusText + ' ' + props?.index);
+          const getAlertType = computed(() => {
+            if (props.result.response.status === 'skipped') {
+              return 'warning';
+            }
+            return hasError.value || hasFailure.value ? 'error' : 'success';
+          });
+          return {
+            headerColumns,
+            headerDataRequest,
+            headerDataResponse,
+            assertionsColumns,
+            assertionsRowClassName,
+            testsRowClassName,
+            totalPassed,
+            total,
+            hasFailure,
+            hasError,
+            testsColumns,
+            result: props.result,
+            testDuration,
+            resultTitle,
+            getAlertType,
+            iterationIndex: props?.result?.iterationIndex
+          };
+        }
+      });
+
+      app.use(naive);
+      app.mount('#app');
+    </script>
+  </body>
+</html>
