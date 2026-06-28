@@ -70,9 +70,12 @@ pipeline {
             
             junit allowEmptyResults: true, testResults: 'results.xml'
             
-            publishHTML([
-                reportDir: '.', 
-                reportFiles: 'results.html', 
+            publishHTML(target: [
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: '.',
+                reportFiles: 'results.html',
                 reportName: 'Bruno API Test Report'
             ])
         }
